@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprechübung: Akkusativ-Karten (Fokus)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 650px;
+            width: 100%;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        h1 {
+            color: #005a9c;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        h2 {
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: #fff;
+            border: 3px solid #005a9c;
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin: 20px 0;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0,90,156,0.05);
+        }
+        .question {
+            font-size: 24px;
+            font-weight: normal;
+            color: #222;
+            line-height: 1.5;
+        }
+        .question strong {
+            color: #005a9c;
+            font-weight: bold;
+            border-bottom: 2px dashed #005a9c;
+            padding-bottom: 2px;
+        }
+        .answer {
+            margin-top: 25px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #28a745;
+            background-color: #d4edda;
+            padding: 5px 25px;
+            border-radius: 6px;
+            display: inline-block;
+            visibility: hidden;
+        }
+        .answer.visible {
+            visibility: visible;
+            animation: fadeIn 0.3s ease;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-next {
+            background-color: #005a9c;
+            color: white;
+        }
+        .btn-next:hover {
+            background-color: #004471;
+        }
+        .btn-show {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-show:hover {
+            background-color: #5a6268;
+        }
+        .counter {
+            font-size: 12px;
+            color: #999;
+            margin-top: 15px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kurs DaF A1 – Interaktive Sprechkartei</h1>
+    <h2>Personalpronomen im Akkusativ (Nomen markiert)</h2>
+
+    <div class="card">
+        <div id="question-text" class="question">Klicke auf "Nächste Karte", um zu starten!</div>
+        <div id="answer-text" class="answer"></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-next" onclick="nextCard()">Nächste Karte</button>
+        <button class="btn-show" id="show-btn" onclick="showAnswer()" disabled>Lösung anzeigen</button>
+    </div>
+
+    <div class="counter" id="card-counter">Karten übrig: --</div>
+</div>
+
+<script>
+    // Alle Sätze aus KursDaF_A1_KOPIERVORLAGE_L08_KV6.pdf mit HTML-Hervorhebung
+    const originalData = [
+        { q: "Findest du <strong>den Deutschkurs</strong> gut?", a: "ihn" },
+        { q: "Kennst du <strong>meine Eltern</strong>?", a: "sie" },
+        { q: "Kennst du <strong>meinen Bruder</strong>?", a: "ihn" },
+        { q: "Hast du am Wochenende <strong>deine Freunde</strong> getroffen?", a: "sie" },
+        { q: "Hast du schon <strong>das Zimmer</strong> aufgeräumt?", a: "es" },
+        { q: "Hast du <strong>die Küche</strong> geputzt?", a: "sie" },
+        { q: "Hast du <strong>das Geschirr</strong> gespült?", a: "es" },
+        { q: "Hast du <strong>die Vorlesung</strong> besucht?", a: "sie" },
+        { q: "Hast du <strong>den Arzt</strong> angerufen?", a: "ihn" },
+        { q: "Kennst du <strong>die neue Mitbewohnerin</strong>?", a: "sie" },
+        { q: "Hast du <strong>die Nasentropfen</strong> genommen?", a: "sie" },
+        { q: "Hast du schon <strong>die Klausur</strong> geschrieben?", a: "sie" },
+        { q: "Hast du schon <strong>das Essen</strong> gekocht?", a: "es" },
+        { q: "Machst du <strong>die Rückenübungen</strong>?", a: "sie" },
+        { q: "Nutzt du <strong>das Sportangebot</strong>?", a: "es" },
+        { q: "Verstehst du <strong>die Aufgaben</strong>?", a: "sie" },
+        { q: "Hast du <strong>das Rezept</strong> bekommen?", a: "es" },
+        { q: "Hast du <strong>den Professor</strong> informiert?", a: "ihn" },
+        { q: "Hast du <strong>die Tipps</strong> probiert?", a: "sie" },
+        { q: "Besuchst du heute <strong>deinen Freund</strong>?", a: "ihn" }
+    ];
+
+    let currentDeck = [];
+    let currentCardIndex = -1;
+
+    function shuffleDeck() {
+        currentDeck = [...originalData];
+        for (let i = currentDeck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+        }
+        currentCardIndex = -1;
+    }
+
+    function nextCard() {
+        if (currentDeck.length === 0 || currentCardIndex >= currentDeck.length - 1) {
+            shuffleDeck();
+        }
+
+        currentCardIndex++;
+        const currentCard = currentDeck[currentCardIndex];
+
+        // UI aktualisieren (hier nutzen wir innerHTML wegen der <strong>-Tags)
+        document.getElementById('question-text').innerHTML = currentCard.q;
+        
+        const answerDiv = document.getElementById('answer-text');
+        answerDiv.innerText = currentCard.a;
+        answerDiv.classList.remove('visible');
+
+        document.getElementById('show-btn').disabled = false;
+        document.getElementById('card-counter').innerText = `Karte ${currentCardIndex + 1} von ${currentDeck.length}`;
+    }
+
+    function showAnswer() {
+        const answerDiv = document.getElementById('answer-text');
+        answerDiv.classList.add('visible');
+    }
+</script>
+
+</body>
+</html>
